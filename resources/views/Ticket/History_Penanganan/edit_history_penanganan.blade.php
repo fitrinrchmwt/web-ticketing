@@ -1,0 +1,113 @@
+<div class="modal fade" id="modalEditPenanganan" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form action="{{ route('ticket.edit_penanganan') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Data</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="id_penanganan" id="edit_id_penanganan">
+                    <input type="hidden" name="id_ticket" id="edit_id_ticket">
+
+                    {{-- Status Ticket --}}
+                    <div class="mb-3 row">
+                        <label class="col-sm-2 col-form-label">Status</label>
+                        <div class="col-sm-10">
+                            <select name="id_status" id="edit_id_status" class="form-select" required>
+                                <option value="">-- Pilih Status --</option>
+                                @foreach ($list_status as $status)
+                                    <option value="{{ $status->id_status }}">{{ $status->nama_status }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- Template --}}
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="id_template">Template</label>
+                        </div>
+                        <div class="col-md-10">
+                            <select name="id_template" id="id_template" class="form-select">
+                                <option value="">-- Pilih Template --</option>
+                                @foreach ($list_template as $template)
+                                    <option value="{{ $template->id_template }}"
+                                        data-edit_penanganan="{{ $template->isi_template }}">
+                                        {{ $template->label_template }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- Penanganan --}}
+                    <div class="row mt-3">
+                        <div class="col-md-2">
+                            <label for="penanganan">Penanganan</label>
+                        </div>
+                        <div class="col-md-10">
+                            <textarea rows="3" name="penanganan" id="edit_penanganan" class="form-control"
+                                required></textarea>
+                        </div>
+                    </div>
+
+                    {{-- Dokumentasi --}}
+                    <div class="row mt-3">
+                        <div class="col-md-2">
+                            <label>Dokumentasi</label>
+                        </div>
+                        <div class="col-md-10">
+                            <input type="file" name="dokumentasi" id="edit_dokumentasi" class="form-control"
+                                onchange="previewDokumentasiEdit(this)">
+                            <div id="preview_dokumentasi_edit" class="mt-2"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer justify-content-end">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    //Dokumentasi Add preview
+    function previewDokumentasiEdit(input) {
+        const container = $('#preview_dokumentasi_edit');
+        container.html('');
+
+        if (!input.files || !input.files[0]) return;
+
+        const file = input.files[0];
+        const type = file.type;
+
+        // IMAGE
+        if (type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                container.html(`
+                    <img src="${e.target.result}"
+                         class="img-fluid rounded shadow-sm"
+                         style="max-height:200px">
+                `);
+            };
+            reader.readAsDataURL(file);
+            return;
+        }
+
+        // NON IMAGE (PDF, DOC, DLL, DLL)
+        container.html(`
+            <div class="alert alert-secondary d-flex align-items-center gap-2">
+                <i class="bi bi-file-earmark-text fs-4"></i>
+                <span>${file.name}</span>
+            </div>
+        `);
+    }
+</script>

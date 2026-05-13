@@ -1,0 +1,365 @@
+@extends('layout.layout_sidebar')
+
+@section('title', 'Dashboard')
+
+@section('content')
+<!--begin::App Content Header-->
+        <div class="app-content-header">
+          <!--begin::Container-->
+          <div class="container-fluid">
+            <!--begin::Row-->
+            <div class="row">
+              <div class="col-sm-2">
+                <h4 class="mb-0">Dashboard</h4>
+              </div>
+              <div class="col-sm-10 d-flex justify-content-end">
+                <div style="padding-top : 5px;" class="col-md-2">
+                      <label  class="form-label fw-semibold ">Tanggal Mulai</label>
+                      
+                  </div>
+                  <div class="col-md-3">
+                      <input  type="date" id="tanggal_awal" class="form-control">
+                  </div>
+                  <div style="padding-left : 10px; padding-top : 5px;" class="col-md-2">
+                      <label class="form-label fw-semibold">Tanggal Akhir</label>  
+                  </div>
+                  <div class="col-md-3">
+                      <input type="date" id="tanggal_akhir" class="form-control">
+                  </div>
+              </div>
+
+            <!--end::Row-->
+            </div>
+          </div>
+          <!--end::Container-->
+        </div>
+        <div class="app-content">
+          <!--begin::Container-->
+          <div class="container-fluid">
+            <!-- Info boxes -->
+            <div class="row">
+              <div class="col-12 col-sm-6 col-md-4">
+                <div class="info-box">
+                  <span class="info-box-icon text-bg-light shadow-sm">
+                    <i class="bi bi-file-earmark-bar-graph icon-red"></i>
+                  </span>
+
+                  <div class="info-box-content">
+                    <span class="info-box-text">Jumlah Ticket Bulan Ini</span>
+                  
+                    <span class="info-box-number" id="totalMasuk">0</span>
+                    
+                  </div>
+                  <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+              </div>
+              <!-- /.col -->
+              <div class="col-12 col-sm-6 col-md-4">
+                <div class="info-box">
+                  <span class="info-box-icon text-bg-light shadow-sm">
+                    <i class="bi bi-file-earmark-check icon-red"></i>
+                  </span>
+
+                  <div class="info-box-content">
+                    <span class="info-box-text">Solved Ticket Bulan Ini</span>
+                    <span class="info-box-number" id="totalKeluar">0</span>
+                  </div>
+                  <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+
+              <div class="col-12 col-sm-6 col-md-4">
+                <div class="info-box">
+                  <span class="info-box-icon text-bg-light shadow-sm">
+                    <i class="bi bi-file-earmark-check icon-red"></i>
+                  </span>
+
+                  <div class="info-box-content">
+                    <span class="info-box-text">Ticket On Progress</span>
+                    <span class="info-box-number" id="OnProgres">0</span>
+                  </div>
+                  <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+              </div>
+              
+            </div>
+            <!-- /.row -->
+
+            <!--begin::Row-->
+            <div class="row">
+              <div class="col-md-8">
+                <div class="card mb-4">
+                  <div class="card-header">
+                    <h5 class="card-title">Grafik Ticket Semester</h5>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                    <!--begin::Row-->
+                    <div class="row">
+                      <div class="col-md-12">
+                        
+                        <p class="text-center">
+                        <strong id="keteranganPeriode"></strong>
+                        </p>
+                        <div id="chartMasukKeluar"></div>
+                      </div>
+                    </div>
+                    <!--end::Row-->
+                  </div>
+                  <!-- ./card-body -->
+                  
+                </div>
+                <!-- /.card -->
+              </div>
+              <!-- /.col -->
+               <div class="col-md-4">
+                <div class="card mb-3">
+                  <div class="card-header">
+                    <h5 class="card-title">Daftar Ticket On Progress</h5>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body" style="height: 392px; overflow-y: auto;">
+                    <table  class="table table-bordered " style="text-align:center;">
+                        <thead>
+                            <tr>
+                                <th class="th-merah">Ticket</th>
+                                <th class="th-merah">Tanggal</th>
+                                <th class="th-merah">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticketnewTable">
+                          
+                        </tbody>
+                    </table>
+                  <div class="card-footer">
+                  <div class="row">
+                      <div class="col-md-12">
+                        
+                        <div id="pieChartKategori"></div>
+
+
+                      </div>
+                    </div>
+
+                  
+                  </div>
+                  <!-- /.card-footer -->
+                </div>
+                <!-- /.card -->
+              </div>
+            </div>
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::App Content-->
+@endsection
+@section('script')
+
+ <!-- CHART DASHBOARD YG FIX DIPAKEK -->
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const inputAwal = document.getElementById('tanggal_awal');
+          const inputAkhir = document.getElementById('tanggal_akhir');
+          const chartContainer = document.querySelector("#chartMasukKeluar");
+          const infoPeriode = document.getElementById('keteranganPeriode');
+          let chart = null;
+
+          function formatTanggal(tgl) {
+              return new Date(tgl).toLocaleDateString('id-ID', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+              });
+          }
+
+          // === Fungsi ambil data dari Controller ===
+          function loadChart(tanggalAwal = '', tanggalAkhir = '') {
+              let url = "{{ route('chart.data') }}";
+
+              if (tanggalAwal && tanggalAkhir) {
+                  url += `?tanggal_awal=${tanggalAwal}&tanggal_akhir=${tanggalAkhir}`;
+              }
+
+              fetch(url)
+                  .then(response => response.json())
+                  .then(data => {
+                      document.getElementById('totalMasuk').innerText = data.totalMasuk ?? 0;
+                      document.getElementById('totalKeluar').innerText = data.totalKeluar ?? 0;
+                      document.getElementById('OnProgres').innerText = data.OnProgres ?? 0;
+
+                      let tbody = document.getElementById('ticketnewTable');
+                      tbody.innerHTML = '';
+
+                      if (data.ticketnew.length === 0) {
+                          tbody.innerHTML = `
+                              <tr>
+                                  <td colspan="3" class="text-center">Tidak ada data</td>
+                              </tr>
+                          `;
+                      } else {
+                          data.ticketnew.forEach(ticket => {
+                              tbody.innerHTML += `
+                                  <tr>
+                                      <td style="font-size: 13px; ">${ticket.id_ticket}</td>
+                                      <td style="font-size: 13px !important;">${ticket.created_at_formatted}</td>
+                                      <td>
+                                          <span class="badge bg-biru" >${ticket.nama_status}</span>
+                                      </td>
+                                  </tr>
+                              `;
+                          });
+                      }
+
+                      
+                      
+
+                      const infoPeriode = document.getElementById('keteranganPeriode');
+
+                      if (tanggalAwal && tanggalAkhir) {
+                          const awal = new Date(tanggalAwal);
+                          const akhir = new Date(tanggalAkhir);
+                          infoPeriode.innerText = `Periode: ${formatTanggal(awal)} – ${formatTanggal(akhir)}`;
+                      } else {
+                          // tampilkan periode dari backend (misal: Semester 1 / 2)
+                          if (data.periode) {
+                              infoPeriode.innerText = `Periode: ${data.periode}`;
+                          } else {
+                              infoPeriode.innerText = 'Periode: Semester Aktif';
+                          }
+                      }
+
+                      // === Tentukan tipe x-axis berdasarkan mode ===
+                      const xaxisType = data.mode === 'daily' ? 'category' : 'category';
+
+                      // === Konfigurasi grafik ===
+                      const chartOptions = {
+                          series: [
+                            { name: 'Jumlah Semua Ticket', data: data.masuk },
+                              { name: 'Jumlah Ticket Downtime', data: data.keluar }
+                          ],
+                          chart: {
+                              type: 'area',
+                              height: 286,
+                              toolbar: { show: false }
+                          },
+                          legend: { show: false },
+                          colors: ['#F28BAA', '#FF4313'],
+                          dataLabels: { enabled: false },
+                          stroke: { curve: 'smooth', width: 2 },
+                          fill: {
+                              type: "gradient",
+                              gradient: {
+                                  shadeIntensity: 1,
+                                  opacityFrom: 0.4,
+                                  opacityTo: 0.1,
+                                  stops: [0, 90, 100]
+                              }
+                          },
+                          xaxis: {
+                              type: xaxisType,
+                              categories: data.labels,
+                              labels: {
+                                  rotate: -45,
+                                  style: { colors: '#888', fontSize: '12px' },
+                                  formatter: function(value) {
+                                      return value; // tampilkan label sesuai format dari controller
+                                  }
+                              }
+                          },
+                          yaxis: {
+                              min: 0,
+                              labels: {
+                                  style: { colors: '#888', fontSize: '12px' },
+                                  formatter: function (val) {
+                                      return Math.round(val); // tampilkan sebagai bilangan bulat
+                                  }
+                              }
+                          },
+                          
+                          grid: { borderColor: '#f1f1f1' }
+                      };
+
+                      // === Hapus chart lama sebelum render baru ===
+                      chartContainer.innerHTML = '';
+                      chart = new ApexCharts(chartContainer, chartOptions);
+                      chart.render();
+                      
+                  })
+                  .catch(error => console.error('Error fetching chart data:', error));
+
+
+                  
+          }
+
+          // === Load awal (tanpa filter) ===
+          loadChart();
+
+          // === Update otomatis ketika tanggal berubah ===
+          function handleDateChange() {
+              const awal = inputAwal.value;
+              const akhir = inputAkhir.value;
+
+              if (awal && akhir) {
+                  loadChart(awal, akhir);
+              }
+          }
+
+          inputAwal.addEventListener('change', handleDateChange);
+          inputAkhir.addEventListener('change', handleDateChange);
+
+          
+      });
+      
+
+      </script>
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+      <script type="text/javascript">
+        $(function(){
+          var current = location.pathname;
+          $('.nav-sidebar li a').each(function(){
+            var $this = $(this);
+              // if the current path is like this link, make it active
+              if($this.attr('href').indexOf(current) !== -1){
+                $this.addClass('active');
+              }
+          })
+        })
+      </script>
+
+      <!--Filter smester-->
+      <script>
+        $(function () {
+          $('#semesterRange').daterangepicker({
+            ranges   : {
+              'Semester 1 (Jan - Jun)' : [
+                moment().startOf('year'),
+                moment().month(5).endOf('month')
+              ],
+              'Semester 2 (Jul - Dec)' : [
+                moment().month(6).startOf('month'),
+                moment().endOf('year')
+              ]
+            },
+            startDate: moment().startOf('year'),
+            endDate  : moment().month(5).endOf('month'),
+            locale: {
+              format: 'YYYY-MM-DD'
+            }
+          }, function (start, end, label) {
+            console.log("Filter:", start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+            // contoh redirect ke Laravel
+            // window.location = '?start=' + start.format('YYYY-MM-DD') + '&end=' + end.format('YYYY-MM-DD');
+          });
+        });
+
+      </script>
+
+@endsection
