@@ -163,4 +163,8 @@ Route::get('/home/chart-data', [HomeController::class, 'getChartData'])->name('c
 
 
 
-Route::get('/test', [LoginController::class, 'test']);
+// Route::get('/test', [LoginController::class, 'test']);
+Route::get('/linkstorage', function () {
+    Artisan::call('storage:link');
+    return 'Storage link berhasil dibuat';
+});
