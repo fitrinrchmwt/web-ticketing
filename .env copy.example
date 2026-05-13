@@ -68,4 +68,4 @@ AWS_USE_PATH_STYLE_ENDPOINT=false
 VITE_APP_NAME="${APP_NAME}"
 
 
-#HASHIDS_SALT=pt-sims-ticketing-internal-secret-9f2c7a
+
