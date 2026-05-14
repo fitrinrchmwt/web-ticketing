@@ -13,8 +13,8 @@
             <div class="row g-0">
                 
                 {{-- Bagian Kiri --}}
-                <div class="col-md-5 d-flex flex-column justify-content-center text-white text-center p-5" style="background: #9B2244; height:400px;">
-                    <div class="login-logo"> <img src="{{ asset('asset/img/logo.svg') }}" style= "width:100%;"> </div>
+                <div class="col-md-5 d-flex flex-column justify-content-center text-white text-center p-5" style="background: url('{{ asset('asset/img/lifemedia.jpg') }}'); background-size: cover;">
+                    <img src="{{ asset('asset/img/login/logo-login.png') }}" style="width: 100%;">
                 </div>
 
                 {{-- Bagian Kanan --}}
