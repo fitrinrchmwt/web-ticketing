@@ -42,7 +42,7 @@ class PelangganController extends Controller
 
      public function sync()
     {
-        $url = 'http://localhost/web-ticketing/public/api/customers';
+        $url = url('public/api/customers');
         // dd($url);
 
         $response = Http::timeout(60)->get($url);
